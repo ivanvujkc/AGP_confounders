@@ -127,3 +127,42 @@ resmed<-subset(ressum3,stat=="Median")
 resmed2<-cbind(resmed,BH_qval=p.adjust(as.numeric(as.vector(resmed [,1])),method="BH"))
 colnames(resmed2)[1]<-"pvalue"
 write.csv(resmed2,file="~/pathto_outputdirectory_mismatchtest/unmatch_mannwhitney-bmi.csv")
+
+
+
+
+
+
+library(ggplot2);library(viridis)
+library(ggplot2);library(viridis)
+
+fisherwilxpath<-grep("unmatch",list.files(path="~/pathto_outputdirectory_mismatchtest/",full.names=T),value=T)
+fisherwilxname<-grep("unmatch",list.files(path="~/pathto_outputdirectory_mismatchtest/",full.names=F),value=T)
+fishwilx<-read.table(file=fisherwilxpath[1],sep=",",header=T)
+fishwilx<-cbind(fishwilx,"varthatdiffers"=fisherwilxname[1])
+for(i in 2:length(fisherwilxpath))
+{
+temp<-read.table(file=fisherwilxpath[i],sep=",",header=T)
+temp<-cbind(temp,"varthatdiffers"=fisherwilxname[i])
+fishwilx<-rbind(fishwilx,temp)
+}
+
+fishwilx[,ncol(fishwilx)]<-gsub(".csv","",as.vector(fishwilx[,ncol(fishwilx)]))
+
+fishwilx$matchstat[fishwilx$BH_qval<0.05]<-"mismatched"
+fishwilx$matchstat[fishwilx$BH_qval>0.05]<-"matched"
+fishwilx2<-cbind(fishwilx,colsplit(fishwilx$varthatdiffers,"-",c("X2","variablename")))
+
+ggplot(fishwilx2, aes(x= dis, y= variablename)) + geom_point(aes(colour= matchstat),size=3)+coord_flip()+ scale_color_viridis(option="viridis",discrete=T)+theme_bw()+theme(panel.grid.minor = element_blank(),panel.grid.major.x = element_blank(),panel.grid.major.y = element_blank(), panel.background = element_blank(),axis.text.x = element_text(angle = 90, hjust = 0,vjust=0.3))+scale_y_discrete(position = "right")
+
+
+
+
+
+
+
+
+
+
+
+
