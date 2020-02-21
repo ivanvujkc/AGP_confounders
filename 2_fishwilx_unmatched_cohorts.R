@@ -161,6 +161,7 @@ ggplot(fishwilx2, aes(x= dis, y= variablename)) + geom_point(aes(colour= matchst
 
 
 
+write.csv(fishwilx2,file="~/pathto_outputdirectory_mismatchtest/fishwilx_summary.csv")
 
 
 
