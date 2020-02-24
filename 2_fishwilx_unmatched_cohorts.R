@@ -134,6 +134,7 @@ write.csv(resmed2,file="~/pathto_outputdirectory_mismatchtest/unmatch_mannwhitne
 
 
 library(ggplot2);library(viridis)
+library(ggplot2);library(viridis)
 
 fisherwilxpath<-grep("unmatch",list.files(path="~/pathto_outputdirectory_mismatchtest/",full.names=T),value=T)
 fisherwilxname<-grep("unmatch",list.files(path="~/pathto_outputdirectory_mismatchtest/",full.names=F),value=T)
@@ -158,9 +159,8 @@ ggplot(fishwilx2, aes(x= dis, y= variablename)) + geom_point(aes(colour= matchst
 
 
 
-
-
 write.csv(fishwilx2,file="~/pathto_outputdirectory_mismatchtest/fishwilx_summary.csv")
+
 
 
 
