@@ -8,7 +8,7 @@ dis<-unique(fishwilx2$dis)
 cohortnames <-list.files("~/pathto_casesdirectory",pattern=".csv",full.names=F)
 cohortpaths <-list.files("~/pathto_casesdirectory",pattern=".csv",full.names=T)
 
-# Ensure that vectors "cohortnames" and "dis" include the same list of conditions
+# Ensure that vectors "cohortnames" and "dis" comprise the same list of conditions
 cohortnames%in%dis
 dis%in%cohortnames
 
@@ -27,6 +27,7 @@ outpath<-"~/pathto_outputdirectory_matunmatcohorts/"
 # Define output filepath for visualizations and Adonis results
 outpathadon<-"~/pathto_outputdirectory_matunmat_adonis_graphs/"
 
+# Define path to input OTU/ASV table, with taxa as rows
 tab<-read.table("~/pathto_otutable.txt",sep="\t",header=T,row.names=1)
 
 
@@ -164,12 +165,12 @@ MDSadonis <-adonis(formu, data= ftab2, permutations=adonperms)
 adonmatall<-rbind(adonmatall,adonmat)
 
 
-write.table(adonmat,file=paste(outpathadon, cohortnames,"-adonis_results.csv",sep=""),sep=",",col.names=NA)
+write.table(adonmat,file=paste(outpathadon, cohortnames[h],"-adonis_results.csv",sep=""),sep=",",col.names=NA)
 
-adonsum<-aggregate(adonmat[,"F.Model"], list(adonmat$sampIDparam), mean)
+adonsum<-aggregate(adonmat[,"Fstat"], list(adonmat$sampIDparam), mean)
 adonmat $sampIDparam = factor(adonmat $sampIDparam, adonsum[order(adonsum[,2]),1])
-ggplot(adonmat,aes(x= sampIDparam,y=F.Model)) + theme_bw() +geom_boxplot(fatten = NULL,outlier.size=-1) + stat_summary(fun.y = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.75, size = 1, linetype = "solid") +geom_jitter(height=0,width=0.2,alpha=0.4) +theme(axis.text.x = element_text(angle = 90, hjust =1,vjust=0.3))
-ggsave(filename=paste(outpathadon, cohortnames,"-adonis.pdf",sep=""),height= 3.5,width=4.7)
+ggplot(adonmat,aes(x= sampIDparam,y=Fstat)) + theme_bw() +geom_boxplot(fatten = NULL,outlier.size=-1) + stat_summary(fun.y = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.75, size = 1, linetype = "solid") +geom_jitter(height=0,width=0.2,alpha=0.4) +theme(axis.text.x = element_text(angle = 90, hjust =1,vjust=0.3))
+ggsave(filename=paste(outpathadon, cohortnames[h],"-adonis.pdf",sep=""),height= 3.5,width=4.7)
 }
 
- write.csv(adonmatall,file=paste(outpathadon,"/alldis.csv",sep=""))
+write.csv(adonmatall,file=paste(outpathadon,"/alldis.csv",sep=""))
