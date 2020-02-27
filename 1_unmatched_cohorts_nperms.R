@@ -1,5 +1,5 @@
-# This script creates n permutations of location-matched ('unmatched' for confounding variables) case-control cohorts for a list of conditions.
-# It requires as input a csv file for each condition, with cases being marked as '1' under a column titled 'target'. Such files are the output of python scripts at github.com/jacksklar/AGPMicrobiomeHostPredictions, found in the 'Feature_Cohorts/binary_cohorts_no_matching' output folder. Such files must include all cases that are present in the mapping file. Downstream analysis will be facilitated if files are named such that the condition is one word (without spaces or underscores).
+# This script creates n permutations of location-matched ('unmatched' for confounding variables) case-control cohorts for a list of 'conditions'. Throughout, 'conditions' refers to the host variable that defines cases and controls, for which tests are being performed to understand whether there is a microbiota differences between cases and controls. For example, our study utilized these scripts to test for differences between cases and controls for several diseases, in this case the diseases are compatible with our usage of the word 'condition'.
+# It requires as input a csv file for each condition, with cases being marked as '1' under a column titled 'target'. Such files are the output of python scripts at github.com/jacksklar/AGPMicrobiomeHostPredictions, found in the 'Feature_Cohorts/binary_cohorts_no_matching' output folder. Such files must include all cases that are present in the mapping file. Downstream analysis will be facilitated if files are named such that the condition is one word (without spaces or underscores). Furthermore, to remove subjects with no information regarding a given subject in metadata ('NA' response), filenames denoting cases of a condition should be equivalent to column names referring to that condition in the metatdata file.
 
 library(ggplot2);library(labdsv);library(reshape2);library(vegan)
 
@@ -56,7 +56,7 @@ map3<-map3[!is.na(rowSums(map3)),]
 allmet2<-allmetadat[rownames(map3),]
 
 # Remove all subjects not reporting information for given condition of interest
-allnonnas<-rownames(allmet2[!is.na(allmet2[, dis2[h]]==0),])
+allnonnas<-rownames(allmet2[!is.na(allmet2[, cohortnames[h]]==0),])
 
 # Create mapping file with just location metadata, randomize order of all subjects
 tempmap<-map3[sample(allnonnas,size=length(allnonnas)),c(locvars)]
@@ -72,6 +72,7 @@ eu2<-as.matrix(eudist)
   	# Randomize order of cases, and impose maximum cohort limit (limiting number of cases, hence maxcohortcutoff/2)
   	target1<-sample(target1b,size=min(length(target1b),maxcohortcutoff/2))
 
+  	# Create matrix containing names of all cases, dimensions to accommodate one control per case, and annotated by case/control status
   	ftab<-matrix(nrow=length(target1)*2,ncol=2)
     colnames(ftab)<-c("sampID","target")
     ftab[1:length(target1),1]<-target1
