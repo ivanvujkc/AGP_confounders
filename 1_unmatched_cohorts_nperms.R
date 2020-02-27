@@ -3,7 +3,7 @@
 
 library(ggplot2);library(labdsv);library(reshape2);library(vegan)
 
-# Enter path to directory containing cohorts to make permutations of: 
+# Enter path to directory containing cohorts to make permutations of:
 cohortnames <-list.files("~/pathto_casesdirectory",pattern=".csv",full.names=F)
 cohortpaths <-list.files("~/pathto_casesdirectory",pattern=".csv",full.names=T)
 
