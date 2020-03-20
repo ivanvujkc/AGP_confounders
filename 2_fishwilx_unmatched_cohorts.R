@@ -2,16 +2,26 @@
 
 library(ggplot2); library(ape);library(vegan);library(reshape2);library(RColorBrewer); library(exactRankTests)
 
-all<-list.files("~/pathto_unmatched_cohort_nperms_directory",full.names=F,pattern=".csv")
-allpaths<-list.files("~/pathto_unmatched_cohort_nperms_directory",full.names=T,pattern=".csv")
+outpath<-"~/Downloads/outputdirectory/"
+fishmannpath<-"~/Downloads/outputdirectory/fishmann_unmat/"
+metadat<-read.csv(file="~/Downloads/metadat.csv",header=T,row.names=1)
 
-metadat<-read.csv(file="~/pathto_metadata.csv",header=T,row.names=1)
 
+all<-list.files(outpath,full.names=F,pattern="unmatched.csv")
+allpaths<-list.files(outpath,full.names=T,pattern="unmatched.csv")
+
+# microbiota-associated variables list:
+varscat<-c("sex","alcohol_frequency","vegetable_frequency", "milk_cheese_frequency", "meat_eggs_frequency","bowel_movement_quality","whole_grain_frequency","sugary_sweets_frequency","salted_snacks_frequency")
+
+varscontinuous<-c("age_years","bmi")
 
 # The following set of calculations are for categorical variables (e.g. alcohol consumption frequency), and thus Fisher's exact tests are performed
+
+
+for(k in 1:length(varscat))
+{
 resultmat<-data.frame(matrix(nrow=length(all),ncol=3))
 colnames(resultmat)<-c("var","pvalue","distribution")
-
 for(j in 1:length(allpaths)){
 	ftab<-read.table(file= allpaths[j],header=T,sep=",",row.names=1)
 	target1<-rownames(ftab[ftab $target=="case",])
@@ -19,7 +29,7 @@ for(j in 1:length(allpaths)){
 	mapp3<-cbind(mapp2,"target")
 	mapp3[target1,"target"]<-1
 	mapp3[is.na(mapp3[,"target"]),"target"]<-0
-	m2<-table(mapp3 $target, mapp3 $alcohol_frequency)
+	m2<-table(mapp3 $target, mapp3[,colnames(mapp3)%in% varscat[k]])
 	m2[is.na(m2)]<-0
 	m3<-t(m2)
 
@@ -81,8 +91,8 @@ ressum3<-cbind(ressum2,colsplit(ressum2[,2],"\\.",c("dis","stat")))
 resmed<-subset(ressum3,stat=="Median")
 resmed2<-cbind(resmed,BH_qval=p.adjust(as.numeric(as.vector(resmed [,1])),method="BH"))
 colnames(resmed2)[1]<-"pvalue"
-write.csv(resmed2,file="~/pathto_outputdirectory_mismatchtest/unmatch_fishers-alcfreq.csv")
-
+write.csv(resmed2,file=paste(fishmannpath,"/unmatch_fishers-",varscat[k],".csv",sep=""))
+}
 
 
 
@@ -93,7 +103,8 @@ write.csv(resmed2,file="~/pathto_outputdirectory_mismatchtest/unmatch_fishers-al
 
 
 # The following set of calculations are for continuous variables (e.g. bmi), and thus Mann-Whitney U tests are performed
-
+for(k in 1:length(varscontinuous))
+{
 resultmat<-data.frame(matrix(nrow=length(all),ncol=3))
 colnames(resultmat)<-c("var","pvalue","distribution")
 
@@ -104,11 +115,11 @@ for(j in 1:length(allpaths)){
 	mapp3<-cbind(mapp2,"target")
 	mapp3[target1,"target"]<-1
 	mapp3[is.na(mapp3[,"target"]),"target"]<-0
-	m2<-mapp3[,c("target","bmi")]
+	m2<-mapp3[,c("target", varscontinuous[k])]
 	m3<-t(m2)
 
 	tryCatch(
-	resultmat[j,2]<-wilcox.test(m2$bmi~ m2$target)$p.value
+	resultmat[j,2]<-wilcox.test(m2[,varscontinuous[k]]~ m2$target)$p.value
 	,error=function(e){})
 	
 	tryCatch(
@@ -126,40 +137,40 @@ ressum3<-cbind(ressum2,colsplit(ressum2[,2],"\\.",c("dis","stat")))
 resmed<-subset(ressum3,stat=="Median")
 resmed2<-cbind(resmed,BH_qval=p.adjust(as.numeric(as.vector(resmed [,1])),method="BH"))
 colnames(resmed2)[1]<-"pvalue"
-write.csv(resmed2,file="~/pathto_outputdirectory_mismatchtest/unmatch_mannwhitney-bmi.csv")
-
-
-
-
-
-
-library(ggplot2);library(viridis)
-library(ggplot2);library(viridis)
-
-fisherwilxpath<-grep("unmatch",list.files(path="~/pathto_outputdirectory_mismatchtest/",full.names=T),value=T)
-fisherwilxname<-grep("unmatch",list.files(path="~/pathto_outputdirectory_mismatchtest/",full.names=F),value=T)
-fishwilx<-read.table(file=fisherwilxpath[1],sep=",",header=T)
-fishwilx<-cbind(fishwilx,"varthatdiffers"=fisherwilxname[1])
-for(i in 2:length(fisherwilxpath))
-{
-temp<-read.table(file=fisherwilxpath[i],sep=",",header=T)
-temp<-cbind(temp,"varthatdiffers"=fisherwilxname[i])
-fishwilx<-rbind(fishwilx,temp)
+write.csv(resmed2,file=paste(fishmannpath,"/unmatch_mann-",varscontinuous[k],".csv",sep=""))
 }
 
-fishwilx[,ncol(fishwilx)]<-gsub(".csv","",as.vector(fishwilx[,ncol(fishwilx)]))
-
-fishwilx$matchstat[fishwilx$BH_qval<0.05]<-"mismatched"
-fishwilx$matchstat[fishwilx$BH_qval>0.05]<-"matched"
-fishwilx2<-cbind(fishwilx,colsplit(fishwilx$varthatdiffers,"-",c("X2","variablename")))
-
-ggplot(fishwilx2, aes(x= dis, y= variablename)) + geom_point(aes(colour= matchstat),size=3)+coord_flip()+ scale_color_viridis(option="viridis",discrete=T)+theme_bw()+theme(panel.grid.minor = element_blank(),panel.grid.major.x = element_blank(),panel.grid.major.y = element_blank(), panel.background = element_blank(),axis.text.x = element_text(angle = 90, hjust = 0,vjust=0.3))+scale_y_discrete(position = "right")
 
 
 
 
+library(ggplot2);library(viridis)
+library(ggplot2);library(viridis)
 
-write.csv(fishwilx2,file="~/pathto_outputdirectory_mismatchtest/fishwilx_summary.csv")
+fishmannpaths<-grep("unmatch",list.files(path= fishmannpath,full.names=T),value=T)
+fishmann_names<-grep("unmatch",list.files(path= fishmannpath,full.names=F),value=T)
+fishmannsummary<-read.table(file=fishmannpaths[1],sep=",",header=T)
+fishmannsummary<-cbind(fishmannsummary,"varthatdiffers"=fishmann_names[1])
+for(i in 2:length(fishmannpaths))
+{
+temp<-read.table(file=fishmannpaths[i],sep=",",header=T)
+temp<-cbind(temp,"varthatdiffers"=fishmann_names[i])
+fishmannsummary<-rbind(fishmannsummary,temp)
+}
+
+fishmannsummary[,ncol(fishmannsummary)]<-gsub(".csv","",as.vector(fishmannsummary[,ncol(fishmannsummary)]))
+
+fishmannsummary$matchstat[fishmannsummary$BH_qval<0.05]<-"mismatched"
+fishmannsummary$matchstat[fishmannsummary$BH_qval>0.05]<-"matched"
+fishmannsummary2<-cbind(fishmannsummary,colsplit(fishmannsummary$varthatdiffers,"-",c("X2","variablename")))
+
+ggplot(fishmannsummary2, aes(x= dis, y= variablename)) + geom_point(aes(colour= matchstat),size=3)+coord_flip()+ scale_color_viridis(option="viridis",discrete=T)+theme_bw()+theme(panel.grid.minor = element_blank(),panel.grid.major.x = element_blank(),panel.grid.major.y = element_blank(), panel.background = element_blank(),axis.text.x = element_text(angle = 90, hjust = 0,vjust=0.3))+scale_y_discrete(position = "right")
+
+
+
+
+
+write.csv(fishmannsummary2,file=paste(fishmannpath,"/fishmann_summary.csv",sep=""))
 
 
 
