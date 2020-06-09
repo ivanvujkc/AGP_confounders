@@ -160,5 +160,5 @@ write.table(adonmat,file=paste(outpathadon,"diabetes-adonis_results.csv",sep="")
 
 adonsum<-aggregate(adonmat[,"Fstat"], list(adonmat$sampIDparam), mean)
 adonmat $sampIDparam = factor(adonmat $sampIDparam, adonsum[order(adonsum[,2]),1])
-ggplot(adonmat,aes(x= sampIDparam,y=Fstat)) + theme_bw() +geom_boxplot(fatten = NULL,outlier.size=-1) + stat_summary(fun.y = mean, geom = "errorbar", aes(ymax = ..y.., ymin = ..y..), width = 0.75, size = 1, linetype = "solid") +geom_jitter(height=0,width=0.2,alpha=0.4) +theme(axis.text.x = element_text(angle = 90, hjust =1,vjust=0.3))
+ggplot(adonmat,aes(x= sampIDparam,y=Fstat)) + theme_bw() +geom_boxplot(fatten = 3,outlier.size=-1)  +geom_jitter(height=0,width=0.2,alpha=0.4) +theme(axis.text.x = element_text(angle = 90, hjust =1,vjust=0.3))
 ggsave(filename=paste(outpathadon, "diabetes-adonis.pdf",sep=""),height= 3.5,width=3)
