@@ -165,8 +165,6 @@ ggplot(adonmat,aes(x= sampIDparam,y=Fstat)) + theme_bw() +geom_boxplot(fatten = 
 ggsave(filename=paste(outpathadon, "diabetes-adonis.pdf",sep=""),height= 3.5,width=3)# Define number of cohort permutations to create
 nperms<-25
 
-# Define maximum cohort size (total number of cases and controls)
-maxcohortcutoff<-1000
 
 tab<-read.csv("~/Downloads/merged2_s50_otus_mc01p.csv",header=T,row.names=1)
 
