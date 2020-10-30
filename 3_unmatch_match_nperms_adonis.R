@@ -34,14 +34,6 @@ map1<-read.csv(file="~/Downloads/metadat.csv",header=T,row.names=1)
 map2<-subset(map1,age_years>=20&age_years<=80&antibiotic_history<2&ibd==0&bmi>=12.5)
 map2<-map2[rowSums(map2[,c("country_Canada","country_USA","country_United.Kingdom")])>0,]
 
-# Define number of cohort permutations to create
-nperms<-25
-
-# Define maximum cohort size (total number of cases and controls)
-maxcohortcutoff<-1000
-
-tab<-read.csv("~/Downloads/merged2_s50_otus_mc01p.csv",header=T,row.names=1)
-
 # Remove subjects not in OTU/ASV table
 map2<-map2[rownames(map2)%in%colnames(tab),]
 
