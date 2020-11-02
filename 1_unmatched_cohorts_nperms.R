@@ -108,10 +108,10 @@ locvars<-c("longitude","latitude")
 
 map3<-map3[!is.na(rowSums(map3)),]
 
-allmet2<-allmetadat[rownames(map3),]
+allmet2<-map1[rownames(map3),]
 
 # Remove all subjects not reporting information for given condition of interest
-allnonnas<-rownames(allmet2[!is.na(allmet2[, cohortnames[h]]==0),])
+allnonnas<-rownames(allmet2[!is.na(allmet2[, "diabetes"]==0),])
 
 # Create mapping file with just location metadata, randomize order of all subjects
 tempmap<-map3[sample(allnonnas,size=length(allnonnas)),c(locvars)]
@@ -148,6 +148,6 @@ eu2<-as.matrix(eudist)
     }
 
 rownames(ftab)<-ftab[,"sampID"]
-write.csv(ftab,paste(outpath, cohortnames[h], "_",l, "_unmatched.csv",sep=""))
+write.csv(ftab,paste(outpath, "diabetes_",l, "_unmatched.csv",sep=""))
 }
 }
