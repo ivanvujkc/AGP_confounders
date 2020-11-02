@@ -24,11 +24,12 @@ resultmat<-data.frame(matrix(nrow=length(all),ncol=3))
 colnames(resultmat)<-c("var","pvalue","distribution")
 for(j in 1:length(allpaths)){
 	ftab<-read.table(file= allpaths[j],header=T,sep=",",row.names=1)
-	target1<-rownames(ftab[ftab $target=="case",])
-	mapp2<-metadat[rownames(metadat)%in%rownames(ftab),]
-	mapp3<-cbind(mapp2,"target")
-	mapp3[target1,"target"]<-1
-	mapp3[is.na(mapp3[,"target"]),"target"]<-0
+	target1<-rownames(ftab)[ftab $target=="case"]
+	mapp3<-merge(ftab, metadat,by=0)
+	# mapp2<-metadat[rownames(metadat)%in%rownames(ftab),]
+	# mapp3<-cbind(mapp2,"target")
+	# mapp3[target1,"target"]<-1
+	# mapp3[is.na(mapp3[,"target"]),"target"]<-0
 	m2<-table(mapp3 $target, mapp3[,colnames(mapp3)%in% varscat[k]])
 	m2[is.na(m2)]<-0
 	m3<-t(m2)
@@ -55,12 +56,8 @@ resultmat[j,1]<-all[j]
 # The following block is performed in the case that the Fisher's exact test workspace was not large enough to accommodate all metadata in the prior block. Thus, P values are simulated.
 for(j in which(is.na(resultmat$pvalue))){
 	ftab<-read.table(file= allpaths[j],header=T,sep=",",row.names=1)
-	target1<-rownames(ftab[ftab $target=="case",])
-	mapp2<-metadat[rownames(metadat)%in%rownames(ftab),]
-	mapp3<-cbind(mapp2,"target")
-	mapp3[target1,"target"]<-1
-	mapp3[is.na(mapp3[,"target"]),"target"]<-0
-	m2<-table(mapp3 $target, mapp3 $alcohol_frequency)
+	mapp3<-merge(ftab, metadat,by=0)
+	m2<-table(mapp3 $target, mapp3[,colnames(mapp3)%in% varscat[k]])
 	m2[is.na(m2)]<-0
 	m3<-t(m2)
 
@@ -110,11 +107,7 @@ colnames(resultmat)<-c("var","pvalue","distribution")
 
 for(j in 1:length(allpaths)){
 	ftab<-read.table(file= allpaths[j],header=T,sep=",",row.names=1)
-	target1<-rownames(ftab[ftab $target=="case",])
-	mapp2<-metadat[rownames(metadat)%in%rownames(ftab),]
-	mapp3<-cbind(mapp2,"target")
-	mapp3[target1,"target"]<-1
-	mapp3[is.na(mapp3[,"target"]),"target"]<-0
+	mapp3<-merge(ftab, metadat,by=0)
 	m2<-mapp3[,c("target", varscontinuous[k])]
 	m3<-t(m2)
 
@@ -123,7 +116,7 @@ for(j in 1:length(allpaths)){
 	,error=function(e){})
 	
 	tryCatch(
-	resultmat[j,3]<-log(mean(m2[m2$target=="case",2])/mean(m2[m2$target==0,2]),base=10)
+	resultmat[j,3]<-log(mean(m2[m2$target=="case",2])/mean(m2[m2$target=="control",2]),base=10)
 	,error=function(e){})
 
 resultmat[j,1]<-all[j]
@@ -162,7 +155,7 @@ fishmannsummary[,ncol(fishmannsummary)]<-gsub(".csv","",as.vector(fishmannsummar
 
 fishmannsummary$matchstat[fishmannsummary$BH_qval<0.05]<-"mismatched"
 fishmannsummary$matchstat[fishmannsummary$BH_qval>0.05]<-"matched"
-fishmannsummary2<-cbind(fishmannsummary,colsplit(fishmannsummary$varthatdiffers,"-",c("X2","variablename")))
+fishmannsummary2<-cbind(fishmannsummary,colsplit(fishmannsummary$varthatdiffers,"-",c("X3","variablename")))
 
 ggplot(fishmannsummary2, aes(x= dis, y= variablename)) + geom_point(aes(colour= matchstat),size=3)+coord_flip()+ scale_color_viridis(option="viridis",discrete=T)+theme_bw()+theme(panel.grid.minor = element_blank(),panel.grid.major.x = element_blank(),panel.grid.major.y = element_blank(), panel.background = element_blank(),axis.text.x = element_text(angle = 90, hjust = 0,vjust=0.3))+scale_y_discrete(position = "right")
 
