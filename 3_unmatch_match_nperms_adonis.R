@@ -57,7 +57,7 @@ locvars<-c("longitude","latitude")
 map3<-map3[!is.na(rowSums(map3)),]
 
 
-varsthatdiffer<-fishwilx2[fishwilx2 $matchstat =="mismatched","variablename"]
+varsthatdiffer<-as.vector(fishwilx2[fishwilx2 $matchstat =="mismatched","variablename"])
 map4<-map3[,c(locvars,as.vector(varsthatdiffer))]
 
 matchstat<-c("matched","unmatched")
@@ -77,7 +77,7 @@ allmet2<-map1[rownames(map4),]
 # Remove all subjects not reporting information for given condition of interest
 allnonnas<-rownames(allmet2[!is.na(allmet2[, "diabetes"]==0),])
 
-
+allnonnas%in%rownames(map3)
 adonmat<-data.frame(matrix(nrow=length(matchstat)*nperms,ncol=10))
 colnames(adonmat)<-colnames(adonmatall)
 for(j in 1:length(matchstat))
