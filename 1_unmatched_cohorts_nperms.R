@@ -123,7 +123,7 @@ eu2<-as.matrix(eudist)
   for (l in 1:nperms)
   {
   	# Select only case subjects with matching variable metadata in mapping file
-	target1b<-targetu[targetu%in%rownames(map3)]
+	target1b<-target1[target1%in%rownames(map3)]
   	# Randomize order of cases, and impose maximum cohort limit (limiting number of cases, hence maxcohortcutoff/2)
   	target1<-sample(target1b,size=min(length(target1b),maxcohortcutoff/2))
 
